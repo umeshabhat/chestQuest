@@ -8,6 +8,7 @@ var opened_chests = new Map();
 var non_empty_chests = new Map();
 var unvisited_rooms = new Map();
 var visited_rooms = new Map();
+// "Visits" (HTTP GET) a specified location with accepted types being "room"/"chest" and its uuid.
 async function visitObject(object_type, uuid) {
     try {
         const response = await (0, node_fetch_1.default)(`https://infinite-castles.herokuapp.com/castles/1/${object_type}s/${uuid}`);
@@ -30,11 +31,13 @@ async function visitObject(object_type, uuid) {
         }
     }
 }
+// Prints the accumulated results.
 function printResults() {
     console.log(`Visited Rooms ${visited_rooms.size}.`);
     console.log(`Opened Chests ${opened_chests.size}.`);
     console.log(`Non-empty Chests ${non_empty_chests.size}.`);
 }
+// Checks a specified room for chests inside and adjacent rooms.
 async function checkRoom(room_id) {
     //Check if room has been visited before.
     if (!visited_rooms.get(room_id)) {
@@ -49,7 +52,7 @@ async function checkRoom(room_id) {
                 var chest_id = current_room["chests"][key].split("/")[4];
                 checkChest(chest_id);
             }
-            // }
+            // }            
             // Check if there are further rooms.
             // if (!Array.isArray(current_room["rooms"]) || !current_room["rooms"].length) {
             // Visit all the adjacent rooms.
@@ -62,6 +65,7 @@ async function checkRoom(room_id) {
         // }
     }
 }
+// Checks if a specified chest is empty/not.
 async function checkChest(chest_id) {
     // Check if chest has been opened before.
     if (!opened_chests.get(chest_id)) {
@@ -83,11 +87,18 @@ async function checkChest(chest_id) {
         }
     }
 }
-async function startChestQuest() {
-    checkRoom("entry");
-}
-startChestQuest();
+// Record starting time.
+var startTime = new Date().getTime();
+// Start Chest Quest!
+checkRoom("entry");
+// Record ending time.
+var endTime = new Date().getTime();
+var timeDiff = endTime - startTime; //in ms.
+timeDiff /= 1000; // strip the ms.
+var seconds = Math.round(timeDiff); // get seconds.
+console.log(`Elapsed time: ${seconds} seconds.`);
 // Algorithm:
+//////////////////////////////////////////
 // Enter current room.
 // Logs the current chests.
 // Log opened chests.
@@ -95,3 +106,4 @@ startChestQuest();
 // Check unvisited rooms.
 // Enter unvisited rooms into a separate dictionary.
 // Visit unvisited rooms until dictionary is empty.
+//////////////////////////////////////////

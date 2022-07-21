@@ -2,6 +2,11 @@
 // Error visiting chests: b2e86a38-c637-460e-a3fe-3245f7ff864c.
 // Error visiting chests: ef45cdc8-ddd0-40f6-9d4c-a8b83230f402.
 
+// Error visiting room: 4ed7c277-28ac-4be4-85ce-ead6461627c8.
+// Error visiting chest: 317c01d8-3103-472d-a1da-d7b96da37554.
+// Error visiting chest: 7fa4cf6e-70cd-4ea0-9545-4630f3c43aa2.
+// Error visiting chest: b368ab53-1b25-4b31-93aa-2b013835ef60.
+
 // async function visitObject() {
 //   try {
 //     const current_response = await fetch('https://infinite-castles.herokuapp.com/castles/1/rooms/entry', {

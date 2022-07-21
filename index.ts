@@ -11,6 +11,7 @@ var non_empty_chests = new Map<string, string>();
 var unvisited_rooms = new Map<string, string>();
 var visited_rooms = new Map<string, string>();
 
+// "Visits" (HTTP GET) a specified location with accepted types being "room"/"chest" and its uuid.
 async function visitObject(object_type: string, uuid: string) {
   try {
     const response = await fetch(`https://infinite-castles.herokuapp.com/castles/1/${object_type}s/${uuid}`);
@@ -32,12 +33,14 @@ async function visitObject(object_type: string, uuid: string) {
   }
 }
 
+// Prints the accumulated results.
 function printResults() {
   console.log(`Visited Rooms ${visited_rooms.size}.`);
   console.log(`Opened Chests ${opened_chests.size}.`);
   console.log(`Non-empty Chests ${non_empty_chests.size}.`);
 }
 
+// Checks a specified room for chests inside and adjacent rooms.
 async function checkRoom(room_id: string) {
   //Check if room has been visited before.
   if (!visited_rooms.get(room_id)) {
@@ -48,18 +51,20 @@ async function checkRoom(room_id: string) {
     var current_room: any = await visitObject("room", room_id);
 
     if (current_room) {
-      
+
       // Check all chests in current room.
       // if (!Array.isArray(current_room["chests"]) || !current_room["chests"].length) {
+
       for (let key in current_room["chests"]) {
         // Split by stroke. Retrieve the chest uuid.
         var chest_id = current_room["chests"][key].split("/")[4];
         checkChest(chest_id);
       }
-      // }
-      
+
+      // }            
       // Check if there are further rooms.
       // if (!Array.isArray(current_room["rooms"]) || !current_room["rooms"].length) {
+
       // Visit all the adjacent rooms.
       for (let key in current_room["rooms"]) {
         // Split by stroke. Retrieve the room uuid.
@@ -67,11 +72,13 @@ async function checkRoom(room_id: string) {
         checkRoom(adjacent_room_id);
       }
     }
+
     // }
 
   }
 }
 
+// Checks if a specified chest is empty/not.
 async function checkChest(chest_id: string) {
   // Check if chest has been opened before.
   if (!opened_chests.get(chest_id)) {
@@ -97,14 +104,21 @@ async function checkChest(chest_id: string) {
   }
 }
 
-async function startChestQuest() {
-  checkRoom("entry");
-}
+// Record starting time.
+var startTime = new Date().getTime();
 
-startChestQuest();
+// Start Chest Quest!
+checkRoom("entry");
 
+// Record ending time.
+var endTime = new Date().getTime(); 
+var timeDiff = endTime - startTime; //in ms.
+timeDiff /= 1000; // strip the ms.
+var seconds = Math.round(timeDiff); // get seconds.
+console.log(`Elapsed time: ${seconds} seconds.`);
 
 // Algorithm:
+//////////////////////////////////////////
 // Enter current room.
 // Logs the current chests.
 // Log opened chests.
@@ -112,3 +126,4 @@ startChestQuest();
 // Check unvisited rooms.
 // Enter unvisited rooms into a separate dictionary.
 // Visit unvisited rooms until dictionary is empty.
+//////////////////////////////////////////
