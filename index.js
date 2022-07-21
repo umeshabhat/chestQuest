@@ -6,27 +6,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_fetch_1 = __importDefault(require("node-fetch"));
 var opened_chests = new Map();
 var non_empty_chests = new Map();
-var unvisited_rooms = new Map();
 var visited_rooms = new Map();
 // "Visits" (HTTP GET) a specified location with accepted types being "room"/"chest" and its uuid.
 async function visitObject(object_type, uuid) {
     try {
         const response = await (0, node_fetch_1.default)(`https://infinite-castles.herokuapp.com/castles/1/${object_type}s/${uuid}`);
-        const object_response = await response.json();
         if (!response.ok) {
             throw new Error(`Error! status: ${response.status}`);
         }
+        const object_response = await response.json();
         return new Promise(resolve => {
             resolve(object_response);
         });
     }
     catch (error) {
         if (error instanceof Error) {
-            console.log(`Error visiting ${object_type}: ${uuid}.`);
+            // console.log(`Error visiting ${object_type}: ${uuid}.`);
             return false;
         }
         else {
-            console.log('An unexpected error occurred');
+            // console.log('An unexpected error occurred');
             return false;
         }
     }
@@ -39,38 +38,30 @@ function printResults() {
 }
 // Checks a specified room for chests inside and adjacent rooms.
 async function checkRoom(room_id) {
-    //Check if room has been visited before.
-    if (!visited_rooms.get(room_id)) {
-        // Mark room as visited.
-        visited_rooms.set(room_id, "visited");
+    if (!visited_rooms.get(room_id)) { // Check if room has been visited before.
+        visited_rooms.set(room_id, "visited"); // Mark room as visited.
         var current_room = await visitObject("room", room_id);
-        if (current_room) {
-            // Check all chests in current room.
-            // if (!Array.isArray(current_room["chests"]) || !current_room["chests"].length) {
-            for (let key in current_room["chests"]) {
-                // Split by stroke. Retrieve the chest uuid.
-                var chest_id = current_room["chests"][key].split("/")[4];
-                checkChest(chest_id);
+        if (current_room) { // Check all chests in current room.
+            if (Array.isArray(current_room["chests"]) && current_room["chests"].length > 0) { // Check if there are chests. Check if valid array.
+                for (let key in current_room["chests"]) {
+                    var chest_id = current_room["chests"][key].split("/")[4]; // Split by stroke. Retrieve the chest uuid.
+                    checkChest(chest_id);
+                }
             }
-            // }            
-            // Check if there are further rooms.
-            // if (!Array.isArray(current_room["rooms"]) || !current_room["rooms"].length) {
-            // Visit all the adjacent rooms.
-            for (let key in current_room["rooms"]) {
-                // Split by stroke. Retrieve the room uuid.
-                var adjacent_room_id = current_room["rooms"][key].split("/")[4];
-                checkRoom(adjacent_room_id);
+            if (Array.isArray(current_room["rooms"]) && current_room["rooms"].length > 0) { // Check if there are further rooms. Check if valid array.
+                for (let key in current_room["rooms"]) { // Visit all the adjacent rooms.
+                    var adjacent_room_id = current_room["rooms"][key].split("/")[4]; // Split by stroke. Retrieve the room uuid.
+                    checkRoom(adjacent_room_id);
+                }
             }
         }
-        // }
     }
+    return true;
 }
 // Checks if a specified chest is empty/not.
 async function checkChest(chest_id) {
-    // Check if chest has been opened before.
-    if (!opened_chests.get(chest_id)) {
-        // Mark chest as opened.
-        opened_chests.set(chest_id, "opened");
+    if (!opened_chests.get(chest_id)) { // Check if chest has been opened before.
+        opened_chests.set(chest_id, "opened"); // Mark chest as opened.
         var current_chest = await visitObject("chest", chest_id);
         if (current_chest) {
             switch (current_chest["status"]) {
@@ -78,25 +69,32 @@ async function checkChest(chest_id) {
                     break;
                 }
                 default: {
-                    // Mark chest as non-empty.
-                    non_empty_chests.set(chest_id, "non-empty");
+                    non_empty_chests.set(chest_id, "non-empty"); // Mark chest as non-empty.
                     // console.log(`Chest ${current_chest["id"]}: ${current_chest["status"]}.`);
                     break;
                 }
             }
         }
     }
+    return true;
 }
-// Record starting time.
-var startTime = new Date().getTime();
-// Start Chest Quest!
-checkRoom("entry");
-// Record ending time.
-var endTime = new Date().getTime();
-var timeDiff = endTime - startTime; //in ms.
-timeDiff /= 1000; // strip the ms.
-var seconds = Math.round(timeDiff); // get seconds.
-console.log(`Elapsed time: ${seconds} seconds.`);
+async function startChestQuest() {
+    var startTime = new Date().getTime(); // Record starting time.
+    var timeDiff; // time difference.
+    var endTime; // ending time.
+    await checkRoom("entry") // Start Chest Quest!
+        .then((returnStatus) => {
+        endTime = new Date().getTime(); // Record ending time.
+        timeDiff = endTime - startTime; //in ms.
+        timeDiff /= 1000; // strip the ms.
+        var seconds = Math.round(timeDiff); // get seconds.
+        console.log(`Elapsed time: ${seconds} seconds.`);
+    })
+        .then((returnStatus) => {
+        printResults();
+    });
+}
+startChestQuest();
 // Algorithm:
 //////////////////////////////////////////
 // Enter current room.
