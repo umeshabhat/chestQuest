@@ -1,4 +1,7 @@
 "use strict";
+// Error visiting rooms: cc842ae9-21bb-454a-93b1-cd919e357149.
+// Error visiting chests: b2e86a38-c637-460e-a3fe-3245f7ff864c.
+// Error visiting chests: ef45cdc8-ddd0-40f6-9d4c-a8b83230f402.
 // async function visitObject() {
 //   try {
 //     const current_response = await fetch('https://infinite-castles.herokuapp.com/castles/1/rooms/entry', {
